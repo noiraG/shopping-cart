@@ -16,10 +16,6 @@
 
     &:hover {
       border: 1px solid #eee;
-
-      .shelf-item__buy-btn {
-        background-color: #eabf00;
-      }
     }
   }
 }
@@ -56,33 +52,16 @@
     }
   }
 
-  .bag {
-    width: 40px;
-    height: 40px;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 15px;
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
+  &-closed {
+    padding: 20px;
+    width: 30px;
+    position: absolute;
+    background-color: #000;
+    background-size: 50%;
+    left: -70px;
+    cursor: pointer;
 
-    &--float-cart-closed {
-      position: absolute;
-      background-color: #000;
-      background-size: 50%;
-      left: -60px;
-      width: 60px;
-      height: 60px;
-      cursor: pointer;
-
-      .bag__quantity {
-        bottom: 5px;
-        right: 10px;
-      }
-    }
-
-    &__quantity {
+    &-quantity {
       display: inline-block;
       width: 18px;
       height: 18px;
@@ -94,8 +73,8 @@
       border-radius: 50%;
       background-color: #eabf00;
       position: absolute;
-      bottom: -5px;
-      right: 0px;
+      top: 20px;
+      left: -20px;
     }
   }
 
@@ -167,6 +146,7 @@
         background-size: auto 100%;
         background-repeat: no-repeat;
         z-index: 2;
+        font-size: xx-large;
         cursor: pointer;
 
         &:hover {
@@ -191,6 +171,7 @@
           height: auto;
         }
       }
+
       &__details {
         width: 57%;
 
@@ -204,6 +185,7 @@
           margin: 0;
         }
       }
+
       &__price {
         color: #eabf00;
         text-align: right;
