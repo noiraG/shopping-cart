@@ -9,15 +9,15 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            cartProducts: data.products.map((p)=> ({id: p.id, qty: 0})),
+            cartProducts: data.products.map((p) => ({id: p.id, qty: 0})),
             totalQty: 0
         };
     }
 
     addProduct = (p) => {
         let state = this.state
-        let prod = state.cartProducts.find((pd)=> pd.id === p.id)
-        prod.qty = prod.qty+1
+        let prod = state.cartProducts.find((pd) => pd.id === p.id)
+        prod.qty = prod.qty + 1
         state.totalQty += 1
         this.setState(state)
     }
@@ -34,7 +34,8 @@ class App extends Component {
         return (
             <div className="App">
                 <ProductList products={data.products} addProduct={this.addProduct}/>
-                <FloatCart cartProducts={this.state.cartProducts} products={data.products} totalQty={this.state.totalQty} removeFromCart={this.removeFromCart}/>
+                <FloatCart cartProducts={this.state.cartProducts} products={data.products}
+                           totalQty={this.state.totalQty} removeFromCart={this.removeFromCart}/>
             </div>
         );
     }
@@ -72,14 +73,29 @@ class ProductItem extends Component {
 }
 
 class ProductList extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedSizes: []
+        };
+    }
+
+    updateFilters = (selectedSizes) => this.setState({selectedSizes: selectedSizes})
+
     render() {
-        const products = this.props.products
+        let products = this.props.products
+        if (this.state.selectedSizes.length > 0){
+            products = products.filter((p)=> p.availableSizes.filter(value => -1 !== this.state.selectedSizes.indexOf(value)).length > 0)
+        }
         const p = products.map(p =>
             <ProductItem product={p} addProduct={this.props.addProduct}/>
         )
         return (
             <div className="product-list">
-                {p}
+                <Filter updateFilters={this.updateFilters}/>
+                <div>
+                    {p}
+                </div>
             </div>
         )
     }
@@ -100,11 +116,11 @@ class FloatCart extends Component {
     };
 
     render() {
-        const { cartProducts, products, totalQty, removeFromCart } = this.props;
+        const {cartProducts, products, totalQty, removeFromCart} = this.props;
         let totalPrice = 0
         let productList = []
-        cartProducts.forEach((cp)=> {
-            let prod = products.find((p)=>p.id === cp.id)
+        cartProducts.forEach((cp) => {
+            let prod = products.find((p) => p.id === cp.id)
             totalPrice += cp.qty * prod.price
             if (cp.qty > 0) {
                 productList.push(<CartProduct product={prod} qty={cp.qty} removeFromCart={removeFromCart}/>)
@@ -133,11 +149,11 @@ class FloatCart extends Component {
                 {/* If cart is closed, show bag with quantity of product and open cart action */}
                 {!this.state.isOpen && (
                     <div>
-                    <img
-                        onClick={() => this.openFloatCart()}
-                        src={cartImage}
-                        className="float-cart-closed"
-                    />
+                        <img
+                            onClick={() => this.openFloatCart()}
+                            src={cartImage}
+                            className="float-cart-closed"
+                        />
                         <div className="float-cart-closed-quantity">{totalQty}</div>
                     </div>
                 )}
@@ -176,10 +192,15 @@ class FloatCart extends Component {
 
 class CartProduct extends Component {
     render() {
-        const { product, qty, removeFromCart } = this.props
+        const {product, qty, removeFromCart} = this.props
 
         const classes = ['shelf-item'];
-
+        let availableSizes = ""
+        product.availableSizes.forEach(s =>
+            {
+                availableSizes = availableSizes + s + " "
+            }
+        )
         return (
             <div className={classes.join(' ')}>
                 <div className="shelf-item__del" onClick={() => removeFromCart(product.id)}>x</div>
@@ -191,7 +212,7 @@ class CartProduct extends Component {
                 <div className="shelf-item__details">
                     <p className="title">{product.title}</p>
                     <p className="desc">
-                        {`${product.availableSizes[0]} | ${product.style}`} <br/>
+                        {`${availableSizes}| ${product.style}`} <br/>
                         Quantity: {qty}
                     </p>
                 </div>
@@ -202,5 +223,78 @@ class CartProduct extends Component {
         );
     }
 }
+
+class Filter extends Component {
+    componentDidMount() {
+        this.selectedCheckboxes = new Set();
+    }
+
+    toggleCheckbox = label => {
+        if (this.selectedCheckboxes.has(label)) {
+            this.selectedCheckboxes.delete(label);
+        } else {
+            this.selectedCheckboxes.add(label);
+        }
+
+        this.props.updateFilters(Array.from(this.selectedCheckboxes));
+    };
+
+    createCheckbox = label => (
+        <Checkbox
+            classes="filters-available-size"
+            label={label}
+            handleCheckboxChange={this.toggleCheckbox}
+            key={label}
+        />
+    );
+
+    createCheckboxes = () => ["XS", "S", "M", "ML", "L", "XL", "XXL"].map(this.createCheckbox);
+
+    render() {
+        return (
+            <div className="filters">
+                <h4 className="title">Sizes:</h4>
+                {this.createCheckboxes()}
+            </div>
+        );
+    }
+}
+
+class Checkbox extends Component {
+    state = {
+        isChecked: false
+    };
+
+    toggleCheckboxChange = () => {
+        const {handleCheckboxChange, label} = this.props;
+
+        this.setState(({isChecked}) => ({
+            isChecked: !isChecked
+        }));
+
+        handleCheckboxChange(label);
+    };
+
+    render() {
+        const {label, classes} = this.props;
+        const {isChecked} = this.state;
+
+        return (
+            <div className={classes}>
+                <label>
+                    <input
+                        type="checkbox"
+                        value={label}
+                        checked={isChecked}
+                        onChange={this.toggleCheckboxChange}
+                    />
+
+                    <span className="checkmark">{label}</span>
+                </label>
+            </div>
+        );
+    }
+}
+
 
 export default App;
